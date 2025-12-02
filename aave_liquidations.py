@@ -101,6 +101,7 @@ QUERIES = {
     # Schema: id, user, reserve, collateralAsset, debtAsset, debtToCover,
     #         liquidatedCollateralAmount, profit, timestamp
     # Note: Reserve only has id and underlyingAsset fields
+    # Note: profit field exists in schema but is always 0 (not populated by handler)
     "liquidations": """
     query GetLiquidations($first: Int!, $skip: Int!, $user: String, $startTime: BigInt, $endTime: BigInt) {
         liquidations(
@@ -118,6 +119,7 @@ QUERIES = {
             timestamp
             user {
                 id
+                healthFactor
             }
             reserve {
                 id
@@ -149,6 +151,7 @@ QUERIES = {
             timestamp
             user {
                 id
+                healthFactor
             }
             reserve {
                 id
@@ -323,7 +326,7 @@ def format_liquidation(liq: dict[str, Any]) -> dict[str, Any]:
     Format a raw liquidation record.
 
     Schema fields:
-    - id, timestamp, user, reserve (id, underlyingAsset)
+    - id, timestamp, user (id, healthFactor), reserve (id, underlyingAsset)
     - collateralAsset, debtAsset (addresses as bytes)
     - debtToCover, liquidatedCollateralAmount, profit (BigInt values)
 
@@ -341,12 +344,14 @@ def format_liquidation(liq: dict[str, Any]) -> dict[str, Any]:
     debt_to_cover = int(liq.get("debtToCover", 0))
     liquidated_collateral = int(liq.get("liquidatedCollateralAmount", 0))
     profit = int(liq.get("profit", 0))
+    health_factor = int(user.get("healthFactor", 0))
 
     return {
         "id": liq.get("id"),
         "timestamp": timestamp,
         "datetime": datetime.fromtimestamp(timestamp).isoformat() if timestamp else None,
         "user": user.get("id"),
+        "health_factor": health_factor,
         "reserve_id": reserve.get("id"),
         "reserve_underlying_asset": reserve.get("underlyingAsset"),
         "collateral_asset": liq.get("collateralAsset"),

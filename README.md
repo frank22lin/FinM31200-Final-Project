@@ -175,17 +175,21 @@ Each liquidation record includes:
   "timestamp": 1704067200,
   "datetime": "2024-01-01T00:00:00",
   "user": "0x...",
+  "health_factor": 950000000000000000,
   "reserve_id": "0x...",
   "reserve_underlying_asset": "0x...",
   "collateral_asset": "0x...",
   "debt_asset": "0x...",
   "debt_to_cover": 1000000000000000000,
   "liquidated_collateral_amount": 500000000000000000,
-  "profit": 25000000000000000
+  "profit": 0
 }
 ```
 
-Note: Amount values are raw BigInt values. Divide by 10^decimals (typically 18 for ETH, 6 for USDC) to get human-readable amounts.
+Notes:
+- Amount values are raw BigInt values. Divide by 10^decimals (typically 18 for ETH, 6 for USDC) to get human-readable amounts.
+- `health_factor` is in 18-decimal format. Divide by 1e18 to get the actual value (e.g., 0.95 means the position was liquidatable).
+- The `profit` field exists in the schema but is always 0 (not populated by the subgraph handler).
 
 ### Understanding AAVE Liquidations
 
